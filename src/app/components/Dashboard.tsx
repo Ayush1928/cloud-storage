@@ -44,13 +44,39 @@ const Dashboard: FunctionComponent<IDashboardProps> = ({ user }) => {
     }
 
     const fetchFiles = async () => {
-        const data = axios.get(`${baseURL}/container/view`, {
-            params: {
-                id: id
+        try {
+            const response = await axios.get(`${baseURL}/container/view`, {
+                params: {
+                    id: id
+                }
+            });
+            setFiles(response.data.blobs);
+        } catch (error: any) {
+            if (error.response && error.response.data.message === "Error retrieving blobs") {
+                console.log("Container not found. Attempting to create a new one.");
+                try {
+                    await axios.post(`${process.env.NEXT_PUBLIC_BASE_URL}/container/create`, {
+                        id: id.toLowerCase().replace(/[^a-z0-9-]/g, '')
+                    });
+                    console.log("New container created. Refetching files.");
+
+                    // Refetch files after creating the container
+                    const newResponse = await axios.get(`${baseURL}/container/view`, {
+                        params: {
+                            id: id
+                        }
+                    });
+                    setFiles(newResponse.data.blobs);
+                } catch (createError) {
+                    console.error("Error creating new container:", createError);
+                    // Handle the error (e.g., show a user-friendly message)
+                }
+            } else {
+                console.error("Error fetching files:", error);
+                // Handle other types of errors
             }
-        })
-        setFiles((await data).data.blobs)
-    }
+        }
+    };
 
     const handleAddFile = async () => {
         const fileInput = document.querySelector<HTMLInputElement>('#blob');
