@@ -101,8 +101,8 @@ const Dashboard: FunctionComponent<IDashboardProps> = ({ user }) => {
                             </TableRow>
                         </TableHeader>
                         <TableBody className="text-white">
-                            {files && files.map((file) => (
-                                <TableRow>
+                            {files && files.map((file, index) => (
+                                <TableRow key={index}>
                                     <TableCell className="font-medium">{file.name}</TableCell>
                                     <Link href={file.url} target="_blank" className="min-w-full">
                                         <TableCell className="truncate">{file.url}</TableCell>
